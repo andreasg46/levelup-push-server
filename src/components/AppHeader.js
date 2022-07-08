@@ -1,28 +1,17 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import {NavLink} from 'react-router-dom'
+import {useSelector, useDispatch} from 'react-redux'
 import {
   CButtonGroup,
   CFormCheck,
   CContainer,
   CHeader,
-  CHeaderBrand,
-  CHeaderDivider,
   CHeaderNav,
-  CHeaderToggler,
   CNavLink,
   CNavItem,
 } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react'
-import { cilMenu, cilMoon, cilSun } from '@coreui/icons'
-
-import { AppBreadcrumb } from './index'
-
-import {
-  AppHeaderDropdown,
-} from './header/index'
-
-import { logo } from 'src/assets/brand/logo'
+import {cilMoon, cilSun} from '@coreui/icons'
 
 const AppHeader = () => {
   const dispatch = useDispatch()
@@ -33,20 +22,9 @@ const AppHeader = () => {
     ? document.body.classList.add('dark-theme')
     : document.body.classList.remove('dark-theme')
 
-  const sidebarShow = useSelector((state) => state.sidebarShow)
-
   return (
     <CHeader position="sticky" className="mb-4">
       <CContainer fluid>
-        <CHeaderToggler
-          className="ps-1"
-          onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
-        >
-          <CIcon icon={cilMenu} size="lg" />
-        </CHeaderToggler>
-        <CHeaderBrand className="mx-auto d-md-none" to="/">
-          <CIcon icon={logo} height={48} alt="Logo" />
-        </CHeaderBrand>
         <CHeaderNav className="d-none d-md-flex me-auto">
           <CNavItem>
             <CNavLink to="/home" component={NavLink}>
@@ -54,48 +32,35 @@ const AppHeader = () => {
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink to="/dashboard" component={NavLink}>
-              Dashboard
+            <CNavLink to="/devices" component={NavLink}>
+              Devices
             </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Users</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Settings</CNavLink>
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav className="ms-auto me-4">
           <CButtonGroup aria-label="Theme switch">
             <CFormCheck
               type="radio"
-              button={{ color: 'primary' }}
+              button={{color: 'primary'}}
               name="theme-switch"
               id="btn-light-theme"
               autoComplete="off"
-              label={<CIcon icon={cilSun} />}
+              label={<CIcon icon={cilSun}/>}
               checked={theme === 'default'}
-              onChange={() => dispatch({ type: 'set', theme: 'light' })}
+              onChange={() => dispatch({type: 'set', theme: 'light'})}
             />
             <CFormCheck
               type="radio"
-              button={{ color: 'primary' }}
+              button={{color: 'primary'}}
               name="theme-switch"
               id="btn-dark-theme"
               autoComplete="off"
-              label={<CIcon icon={cilMoon} />}
+              label={<CIcon icon={cilMoon}/>}
               checked={theme === 'dark'}
-              onChange={() => dispatch({ type: 'set', theme: 'dark' })}
+              onChange={() => dispatch({type: 'set', theme: 'dark'})}
             />
           </CButtonGroup>
         </CHeaderNav>
-        <CHeaderNav className="ms-3 me-4">
-          <AppHeaderDropdown />
-        </CHeaderNav>
-      </CContainer>
-      <CHeaderDivider />
-      <CContainer fluid>
-        <AppBreadcrumb />
       </CContainer>
     </CHeader>
   )

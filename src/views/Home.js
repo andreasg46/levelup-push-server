@@ -1,12 +1,10 @@
 import React from 'react'
-import UsersTable from './UsersTable'
-import MainComponent from "./MainComponent";
+import MainComponent from "./home_components/MainComponent";
 
 const Home = () => {
   return (
     <>
       <MainComponent/>
-      <UsersTable/>
     </>
   )
 }
