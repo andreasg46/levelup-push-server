@@ -8,7 +8,7 @@ import {
   CHeader,
   CHeaderNav,
   CNavLink,
-  CNavItem,
+  CNavItem, CImage,
 } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react'
 import {cilMoon, cilSun} from '@coreui/icons'
@@ -26,6 +26,9 @@ const AppHeader = () => {
     <CHeader position="sticky" className="mb-4">
       <CContainer fluid>
         <CHeaderNav className="d-none d-md-flex me-auto">
+          <CNavItem>
+            <CImage src={'levelup-logo.png'} width={'40'}/>
+          </CNavItem>
           <CNavItem>
             <CNavLink to="/home" component={NavLink}>
               Home
