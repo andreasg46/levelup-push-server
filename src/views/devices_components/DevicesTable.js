@@ -1,37 +1,42 @@
-import React, {useEffect, useState} from 'react'
-import {CCard, CBadge, CButton, CCardHeader, CCardBody, CCardFooter, CSmartTable, CCol, CRow} from '@coreui/react-pro'
+import React, { useEffect, useState } from 'react'
+import { CCard, CBadge, CButton, CCardHeader, CCardBody, CCardFooter, CSmartTable, CCol, CRow } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react';
-import {cilSend} from '@coreui/icons';
-import {getBadge, getOS} from "../common";
-import {SendPushToAll} from "../../OneSignalServer";
+import { cilSend, cilTrash } from '@coreui/icons';
+import { getBadge, getOS } from "../common";
+import { DeleteDevice, getDevices, SendPushToAll } from "../../OneSignalServer";
 
 const DevicesTable = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Retrieve Users Devices
-  useEffect(async () => {
-    const url = 'https://onesignal.com/api/v1/players?app_id='.concat(process.env.REACT_APP_APP_ID) + '&limit=300&offset=offset';
-    const options = {
-      method: 'GET',
-      headers: {Accept: 'text/plain', Authorization: 'Basic ' + `${process.env.REACT_APP_API_KEY}`}
-    };
-    fetch(url, options)
-      .then(res => res.json())
-      .then(json => {
-        setData(json.players);
-      })
-      .catch(err => console.error('error:' + err));
+
+  useEffect(() => {
+    Promise.resolve(
+      getDevices())
+      .then(function (value) {
+        setData(value.players);
+      });
   }, []);
 
+  const resetData = () => {
+    setLoading(true);
+    Promise.resolve(
+      getDevices())
+      .then(function (value) {
+        setData(value.players);
+        setLoading(false);
+      });
+  }
+
   const columns = [
-    {key: 'id', label: 'Player ID'},
-    {key: 'email'},
-    {key: 'device_model'},
-    {key: 'device_type'},
-    // { key: 'tags', _style: { width: '35%' } },
-    {key: 'language'},
-    {key: 'invalid_identifier', label: 'Status'},
-    // {key: 'send', label: '', sorter: false, filter: false, _style: {width: '1%'}},
+    { key: 'id', label: 'Player ID' },
+    { key: 'email' },
+    { key: 'device_model' },
+    { key: 'device_type' },
+    { key: 'language' },
+    { key: 'invalid_identifier', label: 'Status' },
+    { key: 'delete', label: '', sorter: false, filter: false, _style: { width: '1%' } },
   ];
 
   return (
@@ -44,8 +49,9 @@ const DevicesTable = () => {
             </CCardHeader>
             <CCardBody>
               <CSmartTable
-                sorterValue={{column: 'id', state: 'asc'}}
-                tableProps={{striped: true, responsive: true}}
+                loading={loading}
+                sorterValue={{ column: 'id', state: 'asc' }}
+                tableProps={{ striped: true, responsive: true }}
                 items={data}
                 columns={columns}
                 itemsPerPage={50}
@@ -78,16 +84,29 @@ const DevicesTable = () => {
                         color={getBadge(item.invalid_identifier)}>{(item.invalid_identifier === true) ? 'Unsubscribed' : 'Subscribed'}</CBadge>
                     </td>
                   ),
-                  // send: (item) => (
-                  //   <td>
-                  //     <CButton color={'info'} value={JSON.stringify(item)} onClick={() => SendPushByEmail(item)}><CIcon icon={cilSend} /></CButton>
-                  //   </td>
-                  // ),
+                  delete: (item) => (
+                    <td>
+
+                      <CButton color={'danger'}
+                        onClick={() => {
+                          let text = 'Are you sure you want to delete device?!'
+                          if (confirm(text) == true) {
+                            Promise.resolve(
+                              DeleteDevice(item.id)
+                                .then(() => {
+                                  resetData();
+                                }))
+                          }
+                        }}
+
+                      ><CIcon icon={cilTrash} /></CButton>
+                    </td>
+                  ),
                 }}
               />
             </CCardBody>
             <CCardFooter>
-              <CButton color='warning' onClick={() => SendPushToAll()}>Send to all <CIcon icon={cilSend}/></CButton>
+              <CButton color='warning' onClick={() => SendPushToAll()}>Send to all <CIcon icon={cilSend} /></CButton>
             </CCardFooter>
           </CCard>
         </CCol>
