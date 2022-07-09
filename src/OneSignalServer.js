@@ -1,7 +1,17 @@
 ﻿// Send Push
-export function SendPushByEmail(email, message, campaign, datetime) {
+export function SendPushByEmail(email, message, campaign, datetime, topic) {
   message = (message === '' ? 'Default Message' : message);
   campaign = (campaign === '' ? 'Default Campaign' : campaign);
+
+  let body = {
+    email: email,
+    message: message,
+    campaign: campaign,
+    datetime: datetime,
+    topic: topic
+  }
+
+  console.log(body);
 
   const options = {
     method: 'POST',
@@ -17,6 +27,7 @@ export function SendPushByEmail(email, message, campaign, datetime) {
       ],
       external_id: '',
       contents: { en: message },
+      web_push_topic: topic,
       name: campaign,
       send_after: datetime,
     })
@@ -24,7 +35,9 @@ export function SendPushByEmail(email, message, campaign, datetime) {
 
   fetch('https://onesignal.com/api/v1/notifications', options)
     .then(response => response.json())
-    .then(response => console.log(response))
+    .then(response => {
+      response.errors ? alert(response.errors) : alert("Push Notification Send!");
+    })
     .catch(err => console.error(err));
 }
 

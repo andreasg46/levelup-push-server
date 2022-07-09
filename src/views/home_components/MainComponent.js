@@ -1,4 +1,4 @@
-﻿import React, {useEffect, useState} from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import {
   CCard,
   CButton,
@@ -11,15 +11,15 @@ import {
   CForm, CFormLabel, CFormSelect, CFormInput, CFormTextarea
 } from '@coreui/react-pro'
 import CIcon from '@coreui/icons-react';
-import {cilSend} from '@coreui/icons';
-import {today, currentTime} from "../helpers";
-import {SendPushByEmail} from "../../OneSignalServer";
+import { cilSend } from '@coreui/icons';
+import { today, currentTime } from "../helpers";
+import { SendPushByEmail } from "../../OneSignalServer";
 
 const columns = [
-  {key: 'id', label: 'ID'},
-  {key: 'code', label: 'Classroom code'},
-  {key: 'email', label: 'Student email'},
-  {key: 'send', label: '', sorter: false, filter: false, _style: {width: '1%'}},
+  { key: 'id', label: 'ID' },
+  { key: 'code', label: 'Classroom code' },
+  { key: 'email', label: 'Student email' },
+  { key: 'send', label: '', sorter: false, filter: false, _style: { width: '1%' } },
 ];
 
 const MainComponent = () => {
@@ -31,7 +31,8 @@ const MainComponent = () => {
   const [frequency, setFrequency] = useState('');
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const [deliveryTime, setDeliveryTime] = useState('09:00');
+  const [deliveryTime, setDeliveryTime] = useState(currentTime);
+  const [topic, setTopic] = useState('');
   const [message, setMessage] = useState('');
 
   let selectedClassroomAPI = '';
@@ -43,12 +44,12 @@ const MainComponent = () => {
     const url = `${process.env.REACT_APP_API_URL}` + '/classrooms';
     const options = {
       method: 'GET',
-      headers: {Accept: 'text/plain'}
+      headers: { Accept: 'text/plain' }
     };
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
-        let arr = [...[{code: "Select Classroom"}], ...json.data];
+        let arr = [...[{ code: "Select Classroom" }], ...json.data];
         arr.map(item => item['label'] = (item.title) ? (item.code) : ('Select Classroom'))
         arr.map(item => item['value'] = item.code);
         setClassrooms(arr);
@@ -61,7 +62,7 @@ const MainComponent = () => {
     const url = `${process.env.REACT_APP_API_URL}` + '/enrolment/' + selectedClassroomAPI;
     const options = {
       method: 'GET',
-      headers: {Accept: 'text/plain'}
+      headers: { Accept: 'text/plain' }
     };
     fetch(url, options)
       .then(res => res.json())
@@ -91,23 +92,12 @@ const MainComponent = () => {
   const handleSubmit = () => {
     let startDatetime = new Date(startDate + ', ' + deliveryTime);
     let endDatetime = new Date(startDate + ', ' + '23:59');
-    let body = {
-      classroom: selectedClassroom,
-      campaign: campaign,
-      frequency: frequency,
-      startDate: startDatetime,
-      endDate: endDatetime,
-      message: message
-    }
-
-    console.log(body);
-
 
     if (selectedClassroom === '' || message === '') {
       alert('Please select classroom and enter a push message!')
     } else if (emailsList.length > 0) {
       emailsList.map((item) => {
-        SendPushByEmail(item, message, campaign, startDatetime)
+        SendPushByEmail(item, message, campaign, startDatetime, topic)
       })
     }
   }
@@ -129,12 +119,12 @@ const MainComponent = () => {
                       required
                       value={selectedClassroom}
                       onChange={handleSelectClassroom}
-                      options={classrooms}/>
+                      options={classrooms} />
                   </CCol>
                   <br></br>
                   <CSmartTable
-                    sorterValue={{column: 'id', state: 'asc'}}
-                    tableProps={{striped: true, responsive: true}}
+                    sorterValue={{ column: 'id', state: 'asc' }}
+                    tableProps={{ striped: true, responsive: true }}
                     items={enrolmentsData}
                     columns={columns}
                     columnSorter
@@ -144,21 +134,26 @@ const MainComponent = () => {
                       send: (item) => (
                         <td>
                           <CButton color={'info'} value={JSON.stringify(item)}
-                                   onClick={() => SendPushByEmail(item.email, message)}><CIcon
-                            icon={cilSend}/></CButton>
+                            onClick={() => SendPushByEmail(item.email, message, campaign, new Date(startDate + ', ' + deliveryTime), topic)}><CIcon
+                              icon={cilSend} /></CButton>
                         </td>
                       ),
                     }}
                   />
-                  <CCol md={3}>
+                  <CCol md={2}>
                     <CFormLabel htmlFor="inputState">Campaign Name</CFormLabel>
                     <CFormInput placeholder="My Campaign" aria-label="Campaign"
-                                onChange={(e) => setCampaign(e.target.value)}/>
+                      onChange={(e) => setCampaign(e.target.value)} />
                   </CCol>
-                  <CCol md={3}>
+                  <CCol md={2}>
+                    <CFormLabel htmlFor="inputState">Topic</CFormLabel>
+                    <CFormInput placeholder="My Topic" aria-label="Topic"
+                      onChange={(e) => setTopic(e.target.value)} />
+                  </CCol>
+                  <CCol md={2}>
                     <CFormLabel htmlFor="inputState">Frequency</CFormLabel>
                     <CFormSelect id="inputState" defaultValue={'Once per day'}
-                                 onChange={(e) => setFrequency(e.target.value)}>
+                      onChange={(e) => setFrequency(e.target.value)}>
                       <option>Once per day</option>
                       <option>Once per week</option>
                       <option>Once per month</option>
@@ -167,29 +162,29 @@ const MainComponent = () => {
                   <CCol md={2}>
                     <CFormLabel htmlFor="inputState">Start Date</CFormLabel>
                     <CFormInput type={'date'} defaultValue={today} onChange={(e) => setStartDate(e.target.value)}
-                                aria-label="Date"/>
+                      aria-label="Date" />
                   </CCol>
                   <CCol md={2}>
                     <CFormLabel htmlFor="inputState">End Date</CFormLabel>
                     <CFormInput type={'date'} defaultValue={today} onChange={(e) => setEndDate(e.target.value)}
-                                aria-label="Date"/>
+                      aria-label="Date" />
                   </CCol>
                   <CCol md={2}>
                     <CFormLabel htmlFor="inputState">Delivery Time</CFormLabel>
                     <CFormInput type={'time'} defaultValue={currentTime}
-                                onChange={(e) => setDeliveryTime(e.target.value)}
-                                aria-label="Time"/>
+                      onChange={(e) => setDeliveryTime(e.target.value)}
+                      aria-label="Time" />
                   </CCol>
 
                   <CCol md={12}>
                     <CFormLabel htmlFor="inputState">Message</CFormLabel>
                     <CFormTextarea onChange={(e) => setMessage(e.target.value)}
-                                   placeholder="Type your push notification message" aria-label="Message"/>
+                      placeholder="Type your push notification message" aria-label="Message" />
                   </CCol>
                 </CRow>
               </CCardBody>
-              <CCardFooter style={{textAlign: 'end'}}>
-                <CButton type={"submit"}>Submit <CIcon icon={cilSend}/></CButton>
+              <CCardFooter style={{ textAlign: 'end' }}>
+                <CButton type={"submit"}>Submit <CIcon icon={cilSend} /></CButton>
               </CCardFooter>
             </CCard>
           </CForm>
